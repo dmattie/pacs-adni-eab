@@ -41,8 +41,6 @@ TEMP=`getopt -o h: --long help,datasetdir:,subject:,session:,pipeline:,overwrite
 
 if [ $? != 0 ] ; then echo "Terminating..." >&2 ; exit 1 ; fi
 
-# Note the quotes around `$TEMP': they are essential!
-#eval set -- "$TEMP"
 
 DATASETDIR=""
 SUBJECT=""
@@ -111,12 +109,7 @@ else
         break;
     done
     echo "found $infile"
-    # shopt -s globstar  
 
-    # for eachnii in ${DATASETDIR}/rawdata/sub-${SUBJECT}${SESSIONpath}/dwi/*.nii*;do
-    #     infile=$eachnii
-    #     break;
-    # done
 
     SOURCE_dwi=$eachnii
 
@@ -189,15 +182,7 @@ if [[ $res != 0 ]];then
     exit 1
 fi
 
-# for f in $FILES
-# do
-#    fbase=$(echo $f|cut -f 1 -d '.')
-#    echo "flirt -in $f -ref $REFERENCE -omat $fbase.RegTransform4D -out reg2ref.$fbase.nii.gz"
-#    flirt -in $f -ref $REFERENCE -omat $fbase.RegTransform4D -out reg2ref.$fbase.nii.gz
-# done
 
-#run flirt in parallel up to $PARALLELSIM times for all vols created by fslsplit
-#ls vol*.n* | xargs -n1 -P$PARALLELISM -I%  fbase=$(echo $f|cut -f 1 -d '.');flirt -in % -ref $REFERENCE -omat $fbase.RegTransform4D -out reg2ref.$fbase.nii.gz
 
 function flirt_ref() {
   fbase=$(echo $1|cut -f 1 -d '.')
@@ -211,8 +196,7 @@ function flirt_ref() {
   fi
 
 }
-#echo {1..10} | xargs -n 1 | xargs -I@ -P4 bash -c "$(declare -f flirt_ref) ; flirt_ref @ ; echo @ "
-#ls vol*.n* | xargs -n1 -I@ -P$PARALLELISM bash -c "$(declare -f flirt_ref) ; flirt_ref @ $REFERENCE;"
+
 ls vol*.n* | xargs -n1 -I@ -P$PARALLELISM bash -c 'fbase=`echo @|cut -f 1 -d.`;flirt -in @ -ref '$REFERENCE' -omat $fbase.RegTransform4D -out reg2ref.$fbase.nii'
 
 fslmerge -a reg2brain_unmasked.data.nii reg2ref.*
@@ -221,19 +205,14 @@ fslmaths $REFERENCE -bin binary_brainmask.nii
 fslmaths reg2brain_unmasked.data.nii -mul binary_brainmask.nii.gz reg2brain.data.nii
 echo "Transformed for DTI"
 #############
-#### HARDI/QBALL needs to be rearranged, all B0 images first
+#### HARDI/QBALL needs to be rearranged, all B0 images first for tracvis to process as per Ruopeng
 
 BVAL_FILE=$RAWDATA/dwi/bvals
 
 if [[ ! -f $BVAL_FILE ]];then
     allbvals=$RAWDATA/dwi/sub-${SUBJECT}*_dwi.bval
     BVAL_FILE=${allbvals[0]}
-    #Lets find a bids compliant bvals filename supporting multiple runs (we'll take the first one we find)
-    #shopt -s globstar
-    #for eachbval in $RAWDATA/dwi/sub-${SUBJECT}*_dwi.bval; do
-    #    BVAL_FILE=$eachbval
-    #    break;
-    #done
+
 fi
 
 bvals_string=`cat $BVAL_FILE`

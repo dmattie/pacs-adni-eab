@@ -64,22 +64,7 @@ if [[ $MAXCORES == "" ]];then
   >&2 echo "ERROR: this job appears to be set to run on one CPU (variable SLURM_CPUS_PER_TASK unset).  This will probably fail.  Set sbatch --cpus-per-task" 
   exit 1
 fi
-# while true; do
-#   case "$1" in
-#     -h | --help ) Help;exit 1;;
-#     --datasetdir ) DATASETDIR="$2";shift 2;;     
-#     --subject ) SUBJECT="$2";shift 2;;
-#     --session ) SESSION="$2";shift 2;;
-#     --pipeline ) PIPELINE="$2";shift 2;;
-#     --gradientmatrix ) GRADIENTMATRIX="$2";shift 2;;
-#     --maxcores ) MAXCORES="$2";shift 2;;
-#     --overwrite ) OVERWRITE=1;shift;; 
-#     --overlay ) OVERLAY="$2";shift 2;;    
-#     --verbose ) VERBOSE="Y";shift;;                
-#     -- ) shift; break ;;
-#     * ) break ;;
-#   esac
-# done
+
 args=( )
 #replace long parms
 for arg; do
@@ -157,12 +142,6 @@ SOURCE=$DATASETDIR/rawdata/sub-$SUBJECT/$SESSIONpath
 TARGET=$DATASETDIR/derivatives/$PIPELINE/sub-$SUBJECT/$SESSIONpath
 FREESURFER=$DATASETDIR/derivatives/freesurfer/sub-$SUBJECT/$SESSIONpath
   
-# if [[ ! -d $SOURCE ]];then
-#     >&2 echo "ERROR: Specified source directory doesn\'t exist: \($SOURCE\)"
-#     exit 1
-# fi
-
-
 if [[ $OVERWRITE -eq 1 ]];then
     echo "Cleaning house..."
     rm -r --force $TARGET/crush  #Clean up old crush derived results
@@ -192,8 +171,7 @@ if [[ -f $DATASETDIR/derivatives/$PIPELINE/sub-$SUBJECT/$SESSIONpath/parcellatio
    fi
    
 fi
-#echo -n "Checking overlay...${APPTAINER_NAME}"
-#if [[ ! -z "${APPTAINER_NAME}" ]]; then
+
   if [[ $OVERWRITE -eq 1 ]];then
     rm -r --force /crush
   fi
@@ -208,12 +186,7 @@ fi
     echo "No overlay file detected.  It is strongly encouraged to use an overlay file to improve performance and avoid disk quotas.  See APPTAINER overlays."
     exit 1
   fi  
-# else
-#   OVERLAY_PATH=""
-#   CRUSHPATH="$DATASETDIR/derivatives/$PIPELINE/sub-$SUBJECT/$SESSIONpath/crush"
-#   echo "No overlay file detected.  It is strongly encouraged to use an overlay file to improve performance and avoid disk quotas.  See APPTAINER overlays."
-#   exit 1
-# fi
+
 #############################################################################
 echo "Crushing across $MAXCORES processes"
 #############################################################################
@@ -266,23 +239,7 @@ if [[ ! $? -eq 0 ]];then
   echo "FAILED, previous messages should elucidate the issue"
   return 1
 fi
-# cat $TARGET/crush_iterator.csv |xargs -I@ bash -c 'roi_start=`echo @|cut -d, -f1`;roi_end=`echo @|cut -d, -f2`;method=`echo @|cut -d, -f3`;echo python '${SCRIPTPATH}'/lib/crush/get_tract_measurements.py -roi_start '${roi_start}' -roi_end '$roi_end' -method '$method' -tract '${TRACT}' -pipeline '${PIPELINE}' -crush_dir '${CRUSHPATH}
-#exit
-##########################################################################
-# if [[ $MAXCORES == "" ]];then
-#     python3 ${SCRIPTPATH}/lib/crush/crush.py -datasetdir $DATASETDIR \
-#     -subject $SUBJECT \
-#     -session "$SESSION" \
-#     -pipeline $PIPELINE \
-#     -overlay "$OVERLAY_PATH"
-# else
-#     python3 ${SCRIPTPATH}/lib/crush/crush.py -datasetdir $DATASETDIR \
-#     -subject $SUBJECT \
-#     -session "$SESSION" \
-#     -pipeline $PIPELINE \
-#     -maxcores $MAXCORES \
-#     -overlay "$OVERLAY_PATH"
-# fi
+
 ##########################################################################
 if [[ -f $DATASETDIR/derivatives/$PIPELINE/sub-$SUBJECT/$SESSIONpath/parcellations/wmparc-parcellated.tar ]];then
    cd $DATASETDIR/derivatives/$PIPELINE/sub-$SUBJECT/$SESSIONpath/parcellations

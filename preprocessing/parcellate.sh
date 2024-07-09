@@ -33,7 +33,6 @@ TEMP=`getopt -o h: --long help,datasetdir:,subject:,session:,pipeline:, \
 
 if [ $? != 0 ] ; then echo "Terminating..." >&2 ; exit 1 ; fi
 
-# Note the quotes around `$TEMP': they are essential!
 eval set -- "$TEMP"
 
 DATASETDIR=""
@@ -91,8 +90,7 @@ fi
 if [[ ! -f $SOURCE/mri/wmparc.nii ]];then
     >&2 echo "ERROR: $SOURCE/mri/wmparc.nii not found.  If an .mgz file was found I would have attempted conversion first."
     exit 1
-# else
-#     cp $SOURCE/mri/wmparc.nii $TARGET/parcellations
+
 fi
 
 cd $TARGET/parcellations

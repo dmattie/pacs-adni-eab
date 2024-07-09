@@ -135,7 +135,7 @@ for eachnii in $SOURCE/anat/sub-*T1w.nii*;do
     break;
 done
 
-#######################  DO THE WORK   #########################################
+
 # Do Reconstruction here
 
 mkdir -p $TARGET
@@ -160,12 +160,9 @@ if [[ $? -eq 0 && -f $TARGET/freesurfer/mri/wmparc.mgz ]];then
     echo "recon-all complete"
 fi
 
-# mkdir -p $TARGET/mri
-# touch $TARGET/mri/wmparc.mgz 
-# ecode=$?
 
 #######################  VALIDATE   ############################################
-# Validate the work
+
 if [ ! -f "$TARGET/mri/wmparc.mgz" ];then 
     >&2 echo "ERROR: recon_all failed.  No changes committed"; 
     exit 1; 
